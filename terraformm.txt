@@ -1,0 +1,136 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Network is a demonstration in feb-1",
+    "parameters": {
+        "vpcp": {
+            "Type": "String",
+            "Default": "192.168.0.0/16"
+        },
+        "wedsp": {
+            "Type": "string",
+            "Default": "192.168.0.0/24"
+        },
+        "datasp": {
+            "Type": "string",
+            "Default": "192.168.1.0/24"
+        }
+    },
+    "Resources": {
+        "myvoc": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "vpcp"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Total"
+                    }
+                ]
+            }
+        }
+    },
+    "websubnet": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+            "AvailabilityZone": "ap-south-1a",
+            "VpcId": {
+                "Ref": "myvoc"
+            },
+            "CidrBlock": {
+                "Ref": "websp"
+            },
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "web"
+                }
+            ]
+        }
+    },
+    "datasubnet": {
+        "Type" : "AWS::EC2::Subnet",
+     "Properties" : {
+            "AvailabilityZone": "ap-south-1b",
+             "VpcId": {"Ref": "myvoc" },
+            "CidrBlock": {
+                "Ref": "datasp"
+            },
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "data"
+                }
+            ]
+        }
+    },
+    "myigw": {
+        "Type": "AWS::EC2::InternetGateway",
+        "Properties": {
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "youigw"
+                }
+            ]
+        }
+    },
+    "AttachGateway": {
+        "Type": "AWS::EC2::VPCGatewayAttachment",
+        "Properties": {
+            "VpcId": {
+                "Ref": "myvoc"
+            },
+            "InternetGatewayId": {
+                "Ref": "myigw"
+            }
+        }
+    },
+    "rtbl": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+            "VpcId": {
+                "Ref": "myvoc"
+            },
+            "Tags": [
+                {
+                    "Key": "Name",
+                    "Value": "youigw"
+                }
+            ]
+        }
+    },
+    "myrout": {
+        "Type": "AWS::EC2::Route",
+        "Properties": {
+            "RouteTableId": {
+                "Ref": "rtbl"
+            },
+            "DestinationCidrBlock": "0.0.0.0/0",
+            "GatewayId": "myigw"
+        }
+    },
+    "rtblasws1": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+            "SubnetId": {
+                "Ref": "websubnet"
+            },
+            "RouteTableId": {
+                "Ref": "rtbl"
+            }
+        }
+    },
+    "rtblasws2": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+            "SubnetId": {
+                "Ref": "datasubnet"
+            },
+            "RouteTableId": {
+                "Ref": "rtbl"
+            }
+        }
+    }
+}
