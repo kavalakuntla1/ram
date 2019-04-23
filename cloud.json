@@ -1,0 +1,192 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "myvpc": {
+            "Type": "AWS::EC2::VPC",
+            "Properties": {
+                "CidrBlock": "192.168.10.0/16",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Total"
+                    }
+                ]
+            }
+        },
+        "websubnet": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": "ap-south-1a",
+                "VpcId": {
+                    "Ref": "myvpc"
+                },
+                "CidrBlock": "192.168.10.0/24",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Sub1"
+                    }
+                ]
+            }
+        },
+        "Datasub": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": "ap-south-1a",
+                "VpcId": {
+                    "Ref": "myvpc"
+                },
+                "CidrBlock": "192.168.11.0/24",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Sub2"
+                    }
+                ]
+            }
+        },
+        "managesub": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": "ap-south-1a",
+                "VpcId": {
+                    "Ref": "myvpc"
+                },
+                "CidrBlock": "192.168.12.0/24",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Sub3"
+                    }
+                ]
+            }
+        },
+        "applicationsub": {
+            "Type": "AWS::EC2::Subnet",
+            "Properties": {
+                "AvailabilityZone": "ap-south-1b",
+                "VpcId": {
+                    "Ref": "myvpc"
+                },
+                "CidrBlock": "192.168.13.0/24",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Sub4"
+                    }
+                ]
+            }
+        },
+        "myigw": {
+            "Type": "AWS::EC2::InternetGateway",
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Myigw"
+                    }
+                ]
+            }
+        },
+        "AttachGateway": {
+            "Type": "AWS::EC2::VPCGatewayAttachment",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "myvpc"
+                },
+                "InternetGatewayId": {
+                    "Ref": "myigw"
+                }
+            }
+        },
+        "myroutt": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "myvpc"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Myrout"
+                    }
+                ]
+            }
+        },
+        "myrout": {
+            "Type": "AWS::EC2::Route",
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "myroutt"
+                },
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": 
+                { "Ref": "myigw" }
+                
+            }
+        },
+        "rtasatew": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "websubnet"
+                },
+                "RouteTableId": {
+                    "Ref": "myroutt"
+                }
+            }
+        },
+        "rtastepd": {
+            "Type": "AWS::EC2::SubnetRouteTableAssociation",
+            "Properties": {
+                "SubnetId": {
+                    "Ref": "Datasub"
+                },
+                "RouteTableId": {
+                    "Ref": "myroutt"
+                }
+            }
+        },
+        "myroutt2": {
+            "Type": "AWS::EC2::RouteTable",
+            "Properties": {
+                "VpcId": {
+                    "Ref": "myvpc"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": "Myrout1"
+                    }
+                ]
+            }
+        },
+        
+        "rtasatm": {
+          "Type": "AWS::EC2::SubnetRouteTableAssociation",
+          "Properties": {
+            "SubnetId": 
+            { "Ref": "managesub" }
+            ,
+            "RouteTableId": 
+            { "Ref": "myroutt2" }
+            
+          }
+        },
+        
+        "rtasatp": {
+          "Type": "AWS::EC2::SubnetRouteTableAssociation",
+          "Properties": {
+            "SubnetId": 
+            { "Ref": "applicationsub" }
+            ,
+            "RouteTableId": 
+            { "Ref": "myroutt2" }
+            
+          }
+        },
+        
+        
+        
+    }
+}
